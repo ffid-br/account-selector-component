@@ -14,7 +14,7 @@ A React component library that provides an elegant account selection interface w
 ## Installation
 
 ```bash
-npm install @ffid/account-selector-component
+npm install @ffid-br/account-selector-component
 ```
 
 ## Usage

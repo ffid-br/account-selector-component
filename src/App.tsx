@@ -110,7 +110,7 @@ function App() {
         <div className="mt-8">
           <h3 className="mb-2 text-lg font-semibold">Component Usage:</h3>
           <pre className="overflow-x-auto rounded-md bg-gray-800 p-4 text-sm text-white">
-            {`import { AccountSelector } from '@ffid/account-selector-component';
+            {`import { AccountSelector } from '@ffid-br/account-selector-component';
 
 // Your account data
 const accounts = {
