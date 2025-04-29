@@ -12,11 +12,13 @@
     "noEmit": false,
     "declaration": true,
     "declarationDir": "dist",
+    "emitDeclarationOnly": true,
     "jsx": "react-jsx",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/App.tsx", "src/main.tsx"]
 }
