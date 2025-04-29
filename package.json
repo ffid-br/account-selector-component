@@ -1,14 +1,24 @@
 {
   "name": "@ffid-br/account-selector-component",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
+  "style": "dist/style.css",
   "files": [
-    "dist"
+    "dist",
+    "src/lib"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -51,7 +61,7 @@
     "modal",
     "typescript"
   ],
-  "author": "Rodrigo Papp",
+  "author": "FFID",
   "license": "MIT",
   "repository": {
     "type": "git",
