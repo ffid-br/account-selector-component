@@ -55,7 +55,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     <>
       <h2 
         onClick={() => setIsModalOpen(true)}
-        className={`flex cursor-pointer items-center gap-2 text-xl font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200 ${className}`}
+        className={`ffid-account-selector flex cursor-pointer items-center gap-2 text-md font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200 ${className}`}
         role="button"
         aria-haspopup="true"
         aria-expanded={isModalOpen}
@@ -67,14 +67,15 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
           }
         }}
       >
-        {selectedAccount ? selectedAccount.name : 'Select Account'}
+        {selectedAccount ? selectedAccount.name : 'Selecione a conta'}
         <ChevronDown size={20} className="text-gray-500" />
       </h2>
       
       <Modal 
         isOpen={isModalOpen} 
+        className="ffid-account-modal"
         onClose={() => setIsModalOpen(false)}
-        title="Select Account"
+        title="Selecione a conta"
       >
         <div className="mt-2">
           <select
@@ -115,17 +116,18 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
+            style={{ marginRight: '10px' }}
             className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={() => setIsModalOpen(false)}
           >
-            Cancel
+            Cancelar
           </button>
           <button
             type="button"
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={() => setIsModalOpen(false)}
           >
-            Confirm
+            Confirmar
           </button>
         </div>
       </Modal>

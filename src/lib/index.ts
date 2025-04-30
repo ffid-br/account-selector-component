@@ -1,5 +1,3 @@
-import AccountSelector from './components/AccountSelector';
-import { AccountSelectorProps, Account, AccountGroups, AccountSettings } from './types';
-
-export { AccountSelector };
-export type { AccountSelectorProps, Account, AccountGroups, AccountSettings };
+export { default as AccountSelector } from './components/AccountSelector';
+export type { AccountSelectorProps, Account, AccountGroups } from './types';
+import '../index.css';

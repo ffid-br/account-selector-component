@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { ModalProps } from '../types';
 import { X } from 'lucide-react';
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps & { className?: string }> = ({ isOpen, onClose, title, className, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,10 +32,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+    <div className={`w-full mx-auto fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity ${className}`}>
       <div 
         ref={modalRef}
-        className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ease-in-out"
+        className="ffid-modal-content w-full max-w-md rounded-lg bg-white p-6 shadow-xl transition-all duration-300 ease-in-out"
         style={{ 
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'scale(1)' : 'scale(0.95)'
