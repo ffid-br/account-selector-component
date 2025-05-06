@@ -79,7 +79,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
       >
         <div className="mt-2">
           <select
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-700 px-3 py-2 text-base text-dark-500 dark:text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             value={selectedAccount?.id || ''}
             onChange={handleAccountChange}
             autoFocus
@@ -117,7 +117,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
           <button
             type="button"
             style={{ marginRight: '10px' }}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={() => setIsModalOpen(false)}
           >
             Cancelar
