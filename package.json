@@ -1,7 +1,7 @@
 {
   "name": "@ffid-br/account-selector-component",
   "private": false,
-  "version": "0.1.26",
+  "version": "0.1.28",
   "type": "module",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
@@ -30,7 +30,8 @@
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "dependencies": {
-    "lucide-react": "^0.344.0"
+    "lucide-react": "^0.344.0",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AccountSelectorProps, Account } from '../types';
 import Modal from './Modal';
 import { ChevronDown } from 'lucide-react';
+import { twMerge } from "tailwind-merge";
 
 const AccountSelector: React.FC<AccountSelectorProps> = ({ 
   accounts, 
@@ -50,12 +51,18 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     
     setIsModalOpen(false);
   };
-
+  const mergedClassName = twMerge(
+    'ffid-account-selector flex cursor-pointer items-center gap-2 text-md font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200',
+    className
+  );
+  
+  console.log('[AccountSelector] mergedClassName:', mergedClassName);
+  
   return (
     <>
       <h2 
         onClick={() => setIsModalOpen(true)}
-        className={`ffid-account-selector flex cursor-pointer items-center gap-2 text-md font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200 ${className}`}
+        className={mergedClassName}
         role="button"
         aria-haspopup="true"
         aria-expanded={isModalOpen}
