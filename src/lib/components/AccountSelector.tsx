@@ -56,8 +56,6 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     className
   );
   
-  console.log('[AccountSelector] mergedClassName:', mergedClassName);
-  
   return (
     <>
       <h2 
