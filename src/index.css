@@ -1,6 +1,17 @@
 /* @tailwind base;
 @tailwind components;
 @tailwind utilities; */
+
+/* ============================================================
+   FFID Account Selector — Component styles
+   ============================================================
+   These classes complement the Tailwind utility classes used
+   inline. They handle layout constraints that don't depend on
+   the light/dark theme and the custom scrollbar for the
+   autocomplete list.
+   ============================================================ */
+
+/* Backdrop overlay */
 .ffid-account-modal {
   position: fixed;
   z-index: 50;
@@ -8,32 +19,51 @@
   background: rgba(0, 0, 0, 0.5);
 }
 
+/* Content card — constrained width & centered */
 .ffid-modal-content {
   width: 90vw;
   max-width: 400px;
   margin: 1.75rem auto;
-  /* background: white; */
   padding: 1rem;
   border-radius: 0.5rem;
 }
 
+/* Trigger element gap */
 .ffid-account-selector {
   gap: 0.5rem;
 }
 
+/* ---- Custom scrollbar for the autocomplete list ---- */
+
+#account-listbox {
+  scrollbar-width: thin;                    /* Firefox */
+  scrollbar-color: #cbd5e1 transparent;     /* thumb  track */
+}
+
+/* Dark mode scrollbar (when .dark ancestor is present) */
+.dark #account-listbox {
+  scrollbar-color: #475569 transparent;
+}
+
+/* Webkit (Chrome, Edge, Safari) */
 #account-listbox::-webkit-scrollbar {
   width: 6px;
 }
-
 #account-listbox::-webkit-scrollbar-track {
   background: transparent;
 }
-
 #account-listbox::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
-
 #account-listbox::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Webkit dark mode */
+.dark #account-listbox::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark #account-listbox::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }

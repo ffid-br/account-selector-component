@@ -1,15 +1,18 @@
 # Account Selector Component
 
-A React component library that provides an elegant account selection interface with support for grouped accounts.
+An elegant, accessible React account-selection interface with searchable autocomplete, keyboard shortcuts, and full dark-mode support — built with the FFID brand palette.
 
 ## Features
 
-- Interactive h2 element displaying the currently selected account name
-- Modal with account selection dropdown supporting optgroups
-- Support for nested account structures with proper grouping
-- Event emission of selected account ID when user makes a selection
-- Styled with Tailwind CSS for a modern look and feel
-- TypeScript support with proper typing for the account data structure
+- **Searchable autocomplete** — real-time filtering by account name, group, or ID
+- **Keyboard shortcut** — `⌘K` (macOS) / `Ctrl+K` (Windows / Linux) to toggle the selector
+- **Full keyboard navigation** — `↑↓` to navigate, `Enter` to select, `Escape` to close
+- **Grouped accounts** — accounts displayed under sticky group headers with proper `optgroup`-style grouping
+- **Dark mode** — complete dark-mode support via Tailwind's `dark` class strategy
+- **FFID brand palette** — custom `ffid-*` color tokens in Tailwind config for consistent brand styling
+- **Accessible** — ARIA combobox / listbox pattern, `role="dialog"`, `aria-selected`, `aria-activedescendant`
+- **TypeScript** — fully typed props, accounts, and settings interfaces
+- **Lightweight** — only `lucide-react` and `tailwind-merge` as runtime dependencies
 
 ## Installation
 
@@ -17,52 +20,63 @@ A React component library that provides an elegant account selection interface w
 npm install @ffid-br/account-selector-component
 ```
 
-## Usage
+## Quick start
 
 ```tsx
-import React, { useState } from 'react';
-import { AccountSelector } from 'account-selector-component';
-import type { AccountGroups } from 'account-selector-component';
+import { useState } from 'react';
+import { AccountSelector } from '@ffid-br/account-selector-component';
+import '@ffid-br/account-selector-component/dist/style.css';
+import type { AccountGroups } from '@ffid-br/account-selector-component';
 
-// Your account data structure
 const accounts: AccountGroups = {
-  "FFID": [
+  'FFID': [
     {
-      "id": "account-id-1",
-      "name": "FFID Main",
-      "type": "sales",
-      "support_type": "online",
-      "support_name": "Support Name",
-      "settings": {
-        "domains": ["example.com"],
-        "feeds": [],
-        "plugins": [],
-        "checkout": [],
-        "success": [],
-        "short_domain": "",
-        "script": ""
+      id: 'acc-1',
+      name: 'FFID Main',
+      type: 'sales',
+      support_type: 'online',
+      support_name: 'Support',
+      settings: {
+        domains: ['example.com'],
+        feeds: [],
+        plugins: [],
+        checkout: [],
+        success: [],
+        short_domain: '',
+        script: '',
       },
-      "account_ownership_owner": "FFID"
+      account_ownership_owner: 'FFID',
     },
-    // More accounts...
   ],
-  // More account groups...
+  'Partner': [
+    {
+      id: 'acc-2',
+      name: 'Partner Store',
+      type: 'business',
+      support_type: 'premium',
+      support_name: 'Alice',
+      settings: {
+        domains: ['partner.com'],
+        feeds: [],
+        plugins: ['analytics'],
+        checkout: [],
+        success: [],
+        short_domain: '',
+        script: '',
+      },
+      account_ownership_owner: 'Partner',
+    },
+  ],
 };
 
-function YourComponent() {
-  const [selectedAccountId, setSelectedAccountId] = useState<string | undefined>(undefined);
-
-  const handleAccountSelect = (accountId: string) => {
-    setSelectedAccountId(accountId);
-    // Do something with the selected account ID
-  };
+function App() {
+  const [selectedId, setSelectedId] = useState<string | undefined>();
 
   return (
-    <AccountSelector 
+    <AccountSelector
       accounts={accounts}
-      selectedAccountId={selectedAccountId}
-      onAccountSelect={handleAccountSelect}
-      className="your-custom-class" // Optional
+      selectedAccountId={selectedId}
+      onAccountSelect={(id) => setSelectedId(id)}
     />
   );
 }
@@ -70,12 +84,55 @@ function YourComponent() {
 
 ## Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `accounts` | `AccountGroups` | An object where each key is a group name and the value is an array of account objects |
-| `selectedAccountId` | `string \| undefined` | Optional ID of the initially selected account |
-| `onAccountSelect` | `(accountId: string) => void` | Callback function that receives the selected account ID |
-| `className` | `string` | Optional additional CSS classes to apply to the account selector |
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `accounts` | `AccountGroups` | Yes | Object where each key is a group name and the value is an array of `Account` objects. Use `""` as the key for ungrouped accounts. |
+| `selectedAccountId` | `string \| undefined` | No | ID of the currently selected account. When omitted the first account is auto-selected. |
+| `onAccountSelect` | `(accountId: string) => void` | Yes | Callback fired when the user selects an account. Receives the account `id`. |
+| `className` | `string` | No | Additional CSS classes merged onto the trigger element via `tailwind-merge`. |
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `⌘K` / `Ctrl+K` | Toggle the selector modal (global) |
+| `↑` `↓` | Navigate the account list |
+| `Enter` | Select the highlighted account |
+| `Escape` | Close the modal |
+| `Space` / `Enter` | Open the modal (when the trigger is focused) |
+
+## Dark mode
+
+The component uses Tailwind's **`class`** dark-mode strategy. Add the `dark` class to a parent element (typically `<html>` or `<body>`) to activate dark mode:
+
+```html
+<html class="dark">
+  <!-- all AccountSelector elements will render in dark mode -->
+</html>
+```
+
+Every interactive state — focus rings, highlights, hover backgrounds, group headers, keyboard-hint badges, and the scrollbar — adapts automatically.
+
+## FFID brand palette
+
+The Tailwind config ships with `ffid-*` color tokens (50–950) used for primary interactive states (focus rings, highlights, checkmarks). You can override or extend these in your own `tailwind.config.js`:
+
+```js
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        ffid: {
+          500: '#2f5fff', // primary
+          600: '#1a3ff5', // hover / active
+          // ... override any shade you need
+        },
+      },
+    },
+  },
+};
+```
 
 ## Types
 
@@ -104,6 +161,20 @@ interface Account {
 interface AccountGroups {
   [key: string]: Account[];
 }
+
+interface AccountSelectorProps {
+  accounts: AccountGroups;
+  selectedAccountId?: string;
+  onAccountSelect: (accountId: string) => void;
+  className?: string;
+}
+```
+
+## Running tests
+
+```bash
+npm test          # single run
+npm run test:watch # watch mode
 ```
 
 ## License
