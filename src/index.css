@@ -20,3 +20,20 @@
 .ffid-account-selector {
   gap: 0.5rem;
 }
+
+#account-listbox::-webkit-scrollbar {
+  width: 6px;
+}
+
+#account-listbox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#account-listbox::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+#account-listbox::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
