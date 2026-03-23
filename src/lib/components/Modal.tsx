@@ -57,14 +57,14 @@ const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { c
 
   return ReactDOM.createPortal(
     <div
-      className={`w-full mx-auto fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/70 transition-opacity ${className ?? ''}`}
+      className={`w-full mx-auto fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 dark:bg-black/70 transition-opacity ${className ?? ''}`}
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
       <div
         ref={modalRef}
-        className="ffid-modal-content w-full max-w-md rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 ease-in-out"
+        className="ffid-modal-content w-full max-w-lg rounded-t-2xl sm:rounded-xl bg-white dark:bg-gray-900 p-5 sm:p-6 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 ease-in-out"
         style={{
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'scale(1)' : 'scale(0.95)'

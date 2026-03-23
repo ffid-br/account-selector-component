@@ -212,9 +212,6 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
       >
         {selectedAccount ? selectedAccount.name : 'Selecione a conta'}
         <ChevronDown size={20} className="text-gray-500 dark:text-gray-400" />
-        <kbd className="ml-1 rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-xs font-normal text-gray-500 dark:text-gray-400">
-          {shortcutLabel}
-        </kbd>
       </h2>
 
       {/* Selector modal */}
@@ -265,7 +262,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
           ref={listRef}
           id="account-listbox"
           role="listbox"
-          className="mt-2 max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+          className="mt-2 max-h-[50vh] sm:max-h-80 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
         >
           {flatAccounts.length === 0 ? (
             <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -321,8 +318,8 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
           )}
         </div>
 
-        {/* Keyboard hints */}
-        <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+        {/* Keyboard hints — hidden on touch devices, visible on desktop */}
+        <div className="mt-3 hidden sm:flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <div className="flex gap-3">
             <span>
               <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px] text-gray-600 dark:text-gray-300">↑↓</kbd>{' '}
@@ -337,6 +334,9 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
               fechar
             </span>
           </div>
+          <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-[10px] text-gray-600 dark:text-gray-300">
+            {shortcutLabel}
+          </kbd>
         </div>
       </Modal>
     </>

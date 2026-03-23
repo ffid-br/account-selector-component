@@ -134,8 +134,12 @@ describe('AccountSelector', () => {
     expect(screen.getByRole('button')).toHaveTextContent('Selecione a conta');
   });
 
-  it('shows keyboard shortcut badge', () => {
+  it('shows keyboard shortcut badge inside modal', async () => {
     renderSelector();
+    // Shortcut badge should NOT be on the trigger
+    expect(screen.queryByText(/⌘K|Ctrl\+K/)).not.toBeInTheDocument();
+    // Open modal — shortcut should appear in the footer hints
+    await openModal(user);
     expect(screen.getByText(/⌘K|Ctrl\+K/)).toBeInTheDocument();
   });
 

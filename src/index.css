@@ -17,14 +17,23 @@
   background: rgba(0, 0, 0, 0.5);
 }
 
-/* Content card */
+/* Content card — bottom-sheet on mobile, centered card on desktop */
 .ffid-modal-content {
-  width: 90vw;
-  max-width: 400px;
-  margin: 1.75rem auto;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: 1rem 1rem 0 0;
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+@media (min-width: 640px) {
+  .ffid-modal-content {
+    width: 90vw;
+    max-width: 32rem; /* 512px = max-w-lg */
+    margin: 1.75rem auto;
+    border-radius: 0.75rem;
+  }
 }
 
 /* Trigger element */
