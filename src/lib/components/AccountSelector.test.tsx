@@ -288,7 +288,8 @@ describe('AccountSelector', () => {
     await openModal(user);
 
     const option = screen.getByRole('option', { name: /Main Account/ });
-    expect(option).toHaveTextContent('✓');
+    // Check icon is an SVG from lucide-react
+    expect(option.querySelector('svg')).toBeInTheDocument();
   });
 
   // ---- Grouped display ----

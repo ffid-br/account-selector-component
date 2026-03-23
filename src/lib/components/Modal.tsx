@@ -57,24 +57,24 @@ const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { c
 
   return ReactDOM.createPortal(
     <div
-      className={`w-full mx-auto fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity ${className ?? ''}`}
+      className={`w-full mx-auto fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/70 transition-opacity ${className ?? ''}`}
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
       <div
         ref={modalRef}
-        className="ffid-modal-content w-full max-w-md rounded-lg bg-white dark:bg-gray-800 p-6 shadow-xl transition-all duration-300 ease-in-out"
+        className="ffid-modal-content w-full max-w-md rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 ease-in-out"
         style={{
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'scale(1)' : 'scale(0.95)'
         }}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
           <button
             onClick={onClose}
-            className="rounded-full p-1 text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-ffid-500 dark:focus:ring-ffid-400"
+            className="rounded-full p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-ffid-500 dark:focus:ring-ffid-400"
             aria-label="Fechar"
           >
             <X size={20} />

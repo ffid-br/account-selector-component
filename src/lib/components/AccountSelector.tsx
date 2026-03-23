@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { AccountSelectorProps, Account } from '../types';
 import Modal from './Modal';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, Check } from 'lucide-react';
 import { twMerge } from "tailwind-merge";
 
 /**
@@ -15,6 +15,8 @@ import { twMerge } from "tailwind-merge";
  * (e.g. `<html class="dark">`). All interactive states — focus rings,
  * highlights, hover, selected, group headers, kbd hints — adapt to dark mode
  * using the FFID brand palette (`ffid-*` tokens defined in tailwind.config).
+ *
+ * Uses the Inter font family (FFID brand) loaded via CSS.
  *
  * @example
  * ```tsx
@@ -38,10 +40,6 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
   /** Look up an account by ID across all groups. */
   const findAccountById = useCallback((id?: string): Account | null => {
     if (!id) return null;
@@ -52,10 +50,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     return null;
   }, [accounts]);
 
-  // ---------------------------------------------------------------------------
   // Sync selected account with prop / default to first account
-  // ---------------------------------------------------------------------------
-
   useEffect(() => {
     if (selectedAccountId) {
       const account = findAccountById(selectedAccountId);
@@ -69,10 +64,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     }
   }, [selectedAccountId, accounts, findAccountById, onAccountSelect]);
 
-  // ---------------------------------------------------------------------------
   // Global keyboard shortcut: Cmd+K / Ctrl+K
-  // ---------------------------------------------------------------------------
-
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -85,10 +77,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // ---------------------------------------------------------------------------
   // Auto-focus search when modal opens
-  // ---------------------------------------------------------------------------
-
   useEffect(() => {
     if (isModalOpen) {
       setSearchQuery('');
@@ -100,7 +89,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
   }, [isModalOpen]);
 
   // ---------------------------------------------------------------------------
-  // Filtered + flattened accounts (for autocomplete & keyboard nav)
+  // Filtered + flattened accounts
   // ---------------------------------------------------------------------------
 
   /** Groups filtered by the current search query (matches name, group, or id). */
@@ -123,14 +112,20 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     return result;
   }, [accounts, searchQuery]);
 
-  /** Flat ordered list used for arrow-key navigation indexes. */
-  const flatAccounts = useMemo(() => {
+  /** Flat ordered list + O(1) index lookup map. */
+  const { flatAccounts, indexMap } = useMemo(() => {
     const list: Account[] = [];
+    const map = new Map<string, number>();
     for (const group in filteredGroups) {
       const groupAccounts = filteredGroups[group];
-      if (groupAccounts) list.push(...groupAccounts);
+      if (groupAccounts) {
+        for (const acc of groupAccounts) {
+          map.set(acc.id, list.length);
+          list.push(acc);
+        }
+      }
     }
-    return list;
+    return { flatAccounts: list, indexMap: map };
   }, [filteredGroups]);
 
   // Clamp highlighted index when list shrinks
@@ -229,7 +224,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
         onClose={() => setIsModalOpen(false)}
         title="Selecione a conta"
       >
-        {/* Search input with autocomplete */}
+        {/* Search input */}
         <div className="relative mt-2">
           <Search
             size={16}
@@ -240,8 +235,8 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
             type="text"
             className={twMerge(
               'w-full rounded-md border py-2 pl-9 pr-3 text-sm shadow-sm',
-              'border-gray-300 bg-white text-gray-800 placeholder:text-gray-400',
-              'dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-500',
+              'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400',
+              'dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400',
               'focus:border-ffid-500 focus:outline-none focus:ring-1 focus:ring-ffid-500',
               'dark:focus:border-ffid-400 dark:focus:ring-ffid-400'
             )}
@@ -270,7 +265,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
           ref={listRef}
           id="account-listbox"
           role="listbox"
-          className="mt-2 max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600"
+          className="mt-2 max-h-64 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
         >
           {flatAccounts.length === 0 ? (
             <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -283,16 +278,16 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
 
               return (
                 <div key={groupName}>
-                  {/* Group header (sticky while scrolling) */}
+                  {/* Group header (sticky) */}
                   {groupName && (
-                    <div className="sticky top-0 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <div className="sticky top-0 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600">
                       {groupName}
                     </div>
                   )}
 
                   {/* Account rows */}
                   {groupAccounts.map((account) => {
-                    const flatIndex = flatAccounts.indexOf(account);
+                    const flatIndex = indexMap.get(account.id) ?? 0;
                     const isHighlighted = flatIndex === highlightedIndex;
                     const isSelected = account.id === selectedAccount?.id;
 
@@ -304,18 +299,18 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
                         aria-selected={isSelected}
                         data-highlighted={isHighlighted}
                         className={twMerge(
-                          'flex cursor-pointer items-center justify-between px-3 py-2 text-sm transition-colors',
+                          'flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm transition-colors',
                           isHighlighted
-                            ? 'bg-ffid-50 text-ffid-700 dark:bg-ffid-900/30 dark:text-ffid-300'
-                            : 'text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700',
-                          isSelected && !isHighlighted && 'bg-ffid-50/50 dark:bg-ffid-900/15'
+                            ? 'bg-ffid-100 text-ffid-800 dark:bg-ffid-900/40 dark:text-ffid-200 font-medium'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
+                          isSelected && !isHighlighted && 'bg-ffid-50 text-ffid-700 font-medium dark:bg-ffid-950/40 dark:text-ffid-300'
                         )}
                         onClick={() => selectAccount(account)}
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}
                       >
                         <span className="truncate">{account.name}</span>
                         {isSelected && (
-                          <span className="ml-2 text-ffid-600 dark:text-ffid-400">✓</span>
+                          <Check size={16} className="ml-2 shrink-0 text-ffid-600 dark:text-ffid-400" />
                         )}
                       </div>
                     );
@@ -327,18 +322,18 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
         </div>
 
         {/* Keyboard hints */}
-        <div className="mt-3 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <div className="flex gap-3">
             <span>
-              <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px]">↑↓</kbd>{' '}
+              <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px] text-gray-600 dark:text-gray-300">↑↓</kbd>{' '}
               navegar
             </span>
             <span>
-              <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px]">↵</kbd>{' '}
+              <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px] text-gray-600 dark:text-gray-300">↵</kbd>{' '}
               selecionar
             </span>
             <span>
-              <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px]">esc</kbd>{' '}
+              <kbd className="rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 px-1 py-0.5 text-[10px] text-gray-600 dark:text-gray-300">esc</kbd>{' '}
               fechar
             </span>
           </div>
