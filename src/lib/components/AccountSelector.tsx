@@ -296,11 +296,11 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
                         aria-selected={isSelected}
                         data-highlighted={isHighlighted}
                         className={twMerge(
-                          'flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm transition-colors',
+                          'flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm transition-colors border-l-2',
                           isHighlighted
-                            ? 'bg-ffid-100 text-ffid-800 dark:bg-ffid-900/40 dark:text-ffid-200 font-medium'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
-                          isSelected && !isHighlighted && 'bg-ffid-50 text-ffid-700 font-medium dark:bg-ffid-950/40 dark:text-ffid-300'
+                            ? 'bg-ffid-500/15 border-l-ffid-500 text-ffid-900 dark:bg-ffid-400/20 dark:border-l-ffid-400 dark:text-white font-medium'
+                            : 'border-l-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
+                          isSelected && !isHighlighted && 'bg-ffid-50 border-l-ffid-400 text-ffid-700 font-medium dark:bg-ffid-950/40 dark:border-l-ffid-500 dark:text-ffid-300'
                         )}
                         onClick={() => selectAccount(account)}
                         onMouseEnter={() => setHighlightedIndex(flatIndex)}

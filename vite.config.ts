@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import dts from 'vite-plugin-dts';
-import { resolve } from 'path'; // Add path import
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     dts({
       insertTypesEntry: true,
       include: ['src/lib/**/*', 'src/index.ts'],
@@ -14,7 +16,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve('src/index.ts'), // Changed from src/lib/index.ts
+      entry: resolve('src/index.ts'),
       name: 'AccountSelector',
       formats: ['es', 'umd'],
       fileName: (format) => `index.${format}.js`
@@ -28,11 +30,11 @@ export default defineConfig({
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'index.css') return 'style.css';
-          return assetInfo.name || 'asset-[hash]'; // Added fallback string
+          return assetInfo.name || 'asset-[hash]';
         }
       }
     },
     sourcemap: true,
-    cssCodeSplit: true, // Changed from false to true
+    cssCodeSplit: true,
   }
 });
