@@ -64,7 +64,7 @@ const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { c
     >
       <div
         ref={modalRef}
-        className="ffid-modal-content w-full max-w-lg rounded-t-2xl sm:rounded-xl bg-white dark:bg-gray-900 p-5 sm:p-6 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 ease-in-out"
+        className="ffid-modal-content w-full max-w-lg rounded-t-2xl sm:rounded-xl bg-white dark:bg-gray-900 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 ease-in-out"
         style={{
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'scale(1)' : 'scale(0.95)'

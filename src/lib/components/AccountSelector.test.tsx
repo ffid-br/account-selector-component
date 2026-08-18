@@ -114,6 +114,7 @@ describe('AccountSelector', () => {
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
+    sessionStorage.clear();
     user = userEvent.setup();
   });
 
@@ -344,6 +345,39 @@ describe('AccountSelector', () => {
   it('applies custom className to trigger', () => {
     renderSelector({ className: 'my-custom-class' });
     expect(screen.getByRole('button')).toHaveClass('my-custom-class');
+  });
+
+  // ---- Recentes & sessão ----
+
+  it('shows Recentes group with last selected accounts on reopen', async () => {
+    renderSelector();
+    await openModal(user);
+    await user.click(screen.getByText('Company B Account'));
+
+    await user.click(screen.getByRole('button'));
+    const listbox = screen.getByRole('listbox');
+    expect(within(listbox).getByText('Recentes')).toBeInTheDocument();
+    // Conta aparece em Recentes e no grupo original
+    expect(within(listbox).getAllByText('Company B Account')).toHaveLength(2);
+  });
+
+  it('hides Recentes group while searching', async () => {
+    renderSelector();
+    await openModal(user);
+    await user.click(screen.getByText('Company B Account'));
+
+    await user.click(screen.getByRole('button'));
+    await user.type(screen.getByPlaceholderText('Buscar conta...'), 'Company B');
+    const listbox = screen.getByRole('listbox');
+    expect(within(listbox).queryByText('Recentes')).not.toBeInTheDocument();
+    expect(within(listbox).getAllByText('Company B Account')).toHaveLength(1);
+  });
+
+  it('restores last selected account from session when no selectedAccountId', () => {
+    sessionStorage.setItem('ffid-account-selector:recents', JSON.stringify(['c1']));
+    const { onAccountSelect } = renderSelector();
+    expect(screen.getByRole('button')).toHaveTextContent('Company B Account');
+    expect(onAccountSelect).toHaveBeenCalledWith('c1');
   });
 
   // ---- Keyboard hints ----

@@ -27,6 +27,28 @@ import { twMerge } from "tailwind-merge";
  * />
  * ```
  */
+const RECENTS_KEY = 'ffid-account-selector:recents';
+const MAX_RECENTS = 3;
+
+/** Últimas contas selecionadas na sessão (mais recente primeiro). */
+const readRecents = (): string[] => {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(RECENTS_KEY) || '[]');
+    return Array.isArray(raw) ? raw.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveRecent = (id: string) => {
+  try {
+    const recents = [id, ...readRecents().filter(r => r !== id)].slice(0, MAX_RECENTS);
+    sessionStorage.setItem(RECENTS_KEY, JSON.stringify(recents));
+  } catch {
+    // sessionStorage indisponível (SSR / modo privado) — recentes viram no-op
+  }
+};
+
 const AccountSelector: React.FC<AccountSelectorProps> = ({
   accounts,
   selectedAccountId,
@@ -50,16 +72,19 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     return null;
   }, [accounts]);
 
-  // Sync selected account with prop / default to first account
+  // Sync selected account with prop / restore from session / default to first
   useEffect(() => {
     if (selectedAccountId) {
       const account = findAccountById(selectedAccountId);
       if (account) setSelectedAccount(account);
     } else if (Object.keys(accounts).length > 0) {
+      const restored = findAccountById(readRecents()[0]);
       const firstGroup = Object.keys(accounts)[0];
-      if (accounts[firstGroup]?.length > 0) {
-        setSelectedAccount(accounts[firstGroup][0]);
-        onAccountSelect(accounts[firstGroup][0].id);
+      const fallback = accounts[firstGroup]?.[0];
+      const account = restored ?? fallback;
+      if (account) {
+        setSelectedAccount(account);
+        onAccountSelect(account.id);
       }
     }
   }, [selectedAccountId, accounts, findAccountById, onAccountSelect]);
@@ -112,21 +137,31 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     return result;
   }, [accounts, searchQuery]);
 
-  /** Flat ordered list + O(1) index lookup map. */
+  /** Grupo "Recentes" no topo quando não há busca ativa. */
+  const displayGroups = useMemo(() => {
+    if (searchQuery.trim() || !isModalOpen) return filteredGroups;
+    const recents = readRecents()
+      .map(findAccountById)
+      .filter((a): a is Account => a !== null);
+    if (recents.length === 0) return filteredGroups;
+    return { Recentes: recents, ...filteredGroups };
+  }, [filteredGroups, searchQuery, isModalOpen, findAccountById]);
+
+  /** Flat ordered list + O(1) index lookup map (keyed por grupo+id, pois recentes duplicam contas). */
   const { flatAccounts, indexMap } = useMemo(() => {
     const list: Account[] = [];
     const map = new Map<string, number>();
-    for (const group in filteredGroups) {
-      const groupAccounts = filteredGroups[group];
+    for (const group in displayGroups) {
+      const groupAccounts = displayGroups[group];
       if (groupAccounts) {
         for (const acc of groupAccounts) {
-          map.set(acc.id, list.length);
+          map.set(`${group}:${acc.id}`, list.length);
           list.push(acc);
         }
       }
     }
     return { flatAccounts: list, indexMap: map };
-  }, [filteredGroups]);
+  }, [displayGroups]);
 
   // Clamp highlighted index when list shrinks
   useEffect(() => {
@@ -148,6 +183,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
 
   const selectAccount = useCallback((account: Account) => {
     setSelectedAccount(account);
+    saveRecent(account.id);
     onAccountSelect(account.id);
     setIsModalOpen(false);
   }, [onAccountSelect]);
@@ -231,7 +267,8 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
             ref={searchInputRef}
             type="text"
             className={twMerge(
-              'w-full rounded-md border py-2 pl-9 pr-3 text-sm shadow-sm',
+              // text-base no mobile evita o auto-zoom do iOS em inputs < 16px
+              'w-full rounded-md border py-2.5 sm:py-2 pl-9 pr-3 text-base sm:text-sm shadow-sm',
               'border-gray-300 bg-white text-gray-900 placeholder:text-gray-400',
               'dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400',
               'focus:border-ffid-500 focus:outline-none focus:ring-1 focus:ring-ffid-500',
@@ -246,9 +283,7 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
             onKeyDown={handleKeyDown}
             aria-label="Buscar conta"
             aria-activedescendant={
-              flatAccounts[highlightedIndex]
-                ? `account-option-${flatAccounts[highlightedIndex].id}`
-                : undefined
+              flatAccounts[highlightedIndex] ? `account-option-${highlightedIndex}` : undefined
             }
             role="combobox"
             aria-expanded={true}
@@ -262,15 +297,15 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
           ref={listRef}
           id="account-listbox"
           role="listbox"
-          className="mt-2 max-h-[50vh] sm:max-h-80 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+          className="mt-2 max-h-[55dvh] sm:max-h-80 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
         >
           {flatAccounts.length === 0 ? (
             <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
               Nenhuma conta encontrada
             </div>
           ) : (
-            Object.keys(filteredGroups).map((groupName) => {
-              const groupAccounts = filteredGroups[groupName];
+            Object.keys(displayGroups).map((groupName) => {
+              const groupAccounts = displayGroups[groupName];
               if (!groupAccounts || groupAccounts.length === 0) return null;
 
               return (
@@ -284,19 +319,20 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
 
                   {/* Account rows */}
                   {groupAccounts.map((account) => {
-                    const flatIndex = indexMap.get(account.id) ?? 0;
+                    const flatIndex = indexMap.get(`${groupName}:${account.id}`) ?? 0;
                     const isHighlighted = flatIndex === highlightedIndex;
                     const isSelected = account.id === selectedAccount?.id;
 
                     return (
                       <div
-                        key={account.id}
-                        id={`account-option-${account.id}`}
+                        key={`${groupName}:${account.id}`}
+                        id={`account-option-${flatIndex}`}
                         role="option"
                         aria-selected={isSelected}
                         data-highlighted={isHighlighted}
                         className={twMerge(
-                          'flex cursor-pointer items-center justify-between px-3 py-2.5 text-sm transition-colors border-l-2',
+                          // py-3 no mobile ≈ alvo de toque de 44px
+                          'flex cursor-pointer items-center justify-between px-3 py-3 sm:py-2.5 text-sm transition-colors border-l-2',
                           isHighlighted
                             ? 'bg-ffid-500/15 border-l-ffid-500 text-ffid-900 dark:bg-ffid-400/20 dark:border-l-ffid-400 dark:text-white font-medium'
                             : 'border-l-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
