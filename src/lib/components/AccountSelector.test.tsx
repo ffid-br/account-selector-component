@@ -347,6 +347,16 @@ describe('AccountSelector', () => {
     expect(screen.getByRole('button')).toHaveClass('my-custom-class');
   });
 
+  // ---- Focus management ----
+
+  it('restores focus to trigger when modal closes', async () => {
+    renderSelector();
+    const trigger = screen.getByRole('button');
+    await user.click(trigger);
+    await user.keyboard('{Escape}');
+    expect(trigger).toHaveFocus();
+  });
+
   // ---- Recentes & sessão ----
 
   it('shows Recentes group with last selected accounts on reopen', async () => {

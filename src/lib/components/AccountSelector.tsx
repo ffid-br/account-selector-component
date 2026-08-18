@@ -62,6 +62,11 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Ref para não depender da identidade do callback no efeito de sync
+  // (pai passando arrow inline não re-dispara a auto-seleção)
+  const onSelectRef = useRef(onAccountSelect);
+  onSelectRef.current = onAccountSelect;
+
   /** Look up an account by ID across all groups. */
   const findAccountById = useCallback((id?: string): Account | null => {
     if (!id) return null;
@@ -77,17 +82,18 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
     if (selectedAccountId) {
       const account = findAccountById(selectedAccountId);
       if (account) setSelectedAccount(account);
-    } else if (Object.keys(accounts).length > 0) {
-      const restored = findAccountById(readRecents()[0]);
-      const firstGroup = Object.keys(accounts)[0];
-      const fallback = accounts[firstGroup]?.[0];
-      const account = restored ?? fallback;
-      if (account) {
-        setSelectedAccount(account);
-        onAccountSelect(account.id);
-      }
+      return;
     }
-  }, [selectedAccountId, accounts, findAccountById, onAccountSelect]);
+    // Auto-seleção só enquanto nada foi selecionado, para não notificar o pai de novo
+    if (selectedAccount) return;
+    const restored = findAccountById(readRecents()[0]);
+    const firstGroup = Object.keys(accounts)[0];
+    const account = restored ?? accounts[firstGroup]?.[0];
+    if (account) {
+      setSelectedAccount(account);
+      onSelectRef.current(account.id);
+    }
+  }, [selectedAccountId, accounts, findAccountById, selectedAccount]);
 
   // Global keyboard shortcut: Cmd+K / Ctrl+K
   useEffect(() => {
@@ -232,23 +238,16 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
   return (
     <>
       {/* Trigger button */}
-      <h2
+      <button
+        type="button"
         onClick={() => setIsModalOpen(true)}
         className={mergedClassName}
-        role="button"
         aria-haspopup="dialog"
         aria-expanded={isModalOpen}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setIsModalOpen(true);
-          }
-        }}
       >
         {selectedAccount ? selectedAccount.name : 'Selecione a conta'}
         <ChevronDown size={20} className="text-gray-500 dark:text-gray-400" />
-      </h2>
+      </button>
 
       {/* Selector modal */}
       <Modal

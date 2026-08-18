@@ -1,39 +1,69 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { ModalProps } from '../types';
 import { X } from 'lucide-react';
+
+const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
  * Modal — Accessible overlay rendered via React portal.
  *
  * Supports dark mode via the Tailwind `dark` class on a parent element.
  * Closes on Escape key press or click outside the content area.
- * Locks body scroll while open.
+ * Locks body scroll while open, traps Tab inside the dialog and restores
+ * focus to the previously focused element on close. SSR-safe (no DOM
+ * access during render).
  */
-const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { className?: string }): JSX.Element => {
+const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { className?: string }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const portalRoot = document.getElementById('modal-root') || document.createElement('div');
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
-  // Ensure portal root is in the DOM
+  // Ensure portal root exists in the DOM (client-only)
   useEffect(() => {
-    if (!document.getElementById('modal-root')) {
-      portalRoot.id = 'modal-root';
-      document.body.appendChild(portalRoot);
+    let root = document.getElementById('modal-root');
+    const created = !root;
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'modal-root';
+      document.body.appendChild(root);
     }
+    setPortalRoot(root);
 
     return () => {
-      if (document.getElementById('modal-root')?.childNodes.length === 0) {
-        document.body.removeChild(portalRoot);
-      }
+      if (created && root && root.childNodes.length === 0) root.remove();
     };
   }, []);
 
-  // Escape key & click-outside handlers (registered only while open)
+  // Focus restore — efeito próprio keyado só em isOpen: onClose muda de
+  // identidade a cada render do pai e re-executaria o cleanup a cada tecla
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    return () => previouslyFocused?.focus();
+  }, [isOpen]);
+
+  // Escape, click-outside & focus trap (registered only while open)
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE);
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
 
     const handleClickOutside = (e: MouseEvent) => {
@@ -42,18 +72,18 @@ const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { c
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('mousedown', handleClickOutside);
     document.body.style.overflow = 'hidden';
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleClickOutside);
       document.body.style.overflow = 'auto';
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return <></>;
+  if (!isOpen || !portalRoot) return null;
 
   return ReactDOM.createPortal(
     <div
@@ -65,10 +95,6 @@ const Modal = ({ isOpen, onClose, title, className, children }: ModalProps & { c
       <div
         ref={modalRef}
         className="ffid-modal-content w-full max-w-lg rounded-t-2xl sm:rounded-xl bg-white dark:bg-gray-900 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 ease-in-out"
-        style={{
-          opacity: isOpen ? 1 : 0,
-          transform: isOpen ? 'scale(1)' : 'scale(0.95)'
-        }}
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
