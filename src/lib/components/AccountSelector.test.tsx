@@ -213,6 +213,23 @@ describe('AccountSelector', () => {
     expect(within(listbox).queryByText('Main Account')).not.toBeInTheDocument();
   });
 
+  it('ignores accents, case and extra spaces when filtering', async () => {
+    const base = mockAccounts['Company B'][0];
+    renderSelector({
+      accounts: {
+        ...mockAccounts,
+        'Árbore': [{ ...base, id: 'arb1', name: 'Árbore SDR' }],
+      },
+    });
+    await openModal(user);
+    const input = screen.getByPlaceholderText('Buscar conta...');
+    await user.type(input, ' arbore  sdr ');
+
+    const listbox = screen.getByRole('listbox');
+    expect(within(listbox).getByText('Árbore SDR')).toBeInTheDocument();
+    expect(within(listbox).queryByText('Main Account')).not.toBeInTheDocument();
+  });
+
   it('shows empty state when search has no matches', async () => {
     renderSelector();
     await openModal(user);
