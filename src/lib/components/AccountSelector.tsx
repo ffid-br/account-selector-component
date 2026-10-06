@@ -3,6 +3,7 @@ import { AccountSelectorProps, Account } from '../types';
 import Modal from './Modal';
 import { ChevronDown, Search, Check } from 'lucide-react';
 import { twMerge } from "tailwind-merge";
+import { normalizeSearch } from '../utils/normalizeSearch';
 
 /**
  * AccountSelector — FFID account picker with searchable autocomplete.
@@ -125,15 +126,15 @@ const AccountSelector: React.FC<AccountSelectorProps> = ({
 
   /** Groups filtered by the current search query (matches name, group, or id). */
   const filteredGroups = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim();
+    const query = normalizeSearch(searchQuery);
     if (!query) return accounts;
 
     const result: Record<string, Account[]> = {};
     for (const group in accounts) {
+      const groupName = normalizeSearch(group);
       const filtered = accounts[group]?.filter(account => {
-        const name = account.name.toLowerCase();
-        const groupName = group.toLowerCase();
-        const id = account.id.toLowerCase();
+        const name = normalizeSearch(account.name);
+        const id = normalizeSearch(account.id);
         return name.includes(query) || groupName.includes(query) || id.includes(query);
       });
       if (filtered && filtered.length > 0) {
