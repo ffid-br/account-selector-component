@@ -10,6 +10,9 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Incidente 12/11/2026: o trusted publishing do npm exige este environment, que so libera a main.
+    # Sem ele, um workflow com este mesmo nome num branch publicaria no npm.
+    environment: npm-publish
     steps:
       - uses: actions/checkout@v4
 
